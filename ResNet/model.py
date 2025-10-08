@@ -32,10 +32,21 @@ class ResidualBlock(nn.Module):
             )
             
     def forward(self ,x):
-        out = self.relu(self.bn1(self.conv1(x)))
-        out = self.bn2(self.conv2(out))
-        out += self.relu(out)
+        # 主路径
+        identity = self.shortcut(x)  # 先计算shortcut路径
+        
+        out = self.conv1(x)
+        out = self.bn1(out)
         out = self.relu(out)
+        
+        out = self.conv2(out)
+        out = self.bn2(out)
+        
+        # 残差连接
+        out += identity
+        # ReLU在残差连接后应用
+        out = self.relu(out)
+        
         return out
     
 class ResNet18(nn.Module):
@@ -72,3 +83,4 @@ class ResNet18(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x,1)
         x = self.fc(x)
+        return x
